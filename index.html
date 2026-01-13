@@ -15,26 +15,7 @@
       -webkit-font-smoothing: antialiased;
       overscroll-behavior: none;
     }
-    .site-header {
-      padding: 32px 20px 24px;
-      text-align: center;
-      background: radial-gradient(1200px 400px at 50% 0%, rgba(255,255,255,0.12), transparent), #000;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .site-header .title {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
-    }
-
-    .site-header .subtitle {
-      margin-top: 6px;
-      font-size: 14px;
-      color: rgba(255,255,255,0.6);
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-    }
+    header { padding: 20px; text-align: center; background: #000; font-size: 24px; font-weight: bold; }
 
     .years {
       display: flex;
@@ -213,10 +194,7 @@
   </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="title">Фото коллекция</div>
-    <div class="subtitle">Визуальный архив по годам</div>
-  </header>
+  <header>Моя фото коллекция</header>
 
   <nav class="years">
     <button data-year="2022" class="active">2022</button>
@@ -313,39 +291,8 @@
       lightboxImg.src = '';
     });
 
-    let currentIndex = 0;
     const buttons = document.querySelectorAll('.years button');
     const years = document.querySelectorAll('.year');
-
-    buttons.forEach((btn, index) => {
-      btn.addEventListener('click', () => activateYearByIndex(index));
-    });
-
-    // Swipe between years (iOS / mobile)
-    let startX = 0;
-
-    document.addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-
-    document.addEventListener('touchend', e => {
-      const endX = e.changedTouches[0].clientX;
-      const diff = endX - startX;
-
-      if (Math.abs(diff) > 60) {
-        if (diff < 0) activateYearByIndex(currentIndex + 1);
-        else activateYearByIndex(currentIndex - 1);
-      }
-    });));
-      const year = yearKeys[currentIndex];
-
-      buttons.forEach(b => b.classList.toggle('active', b.dataset.year === year));
-      years.forEach(section => {
-        const active = section.dataset.year === year;
-        section.classList.toggle('active', active);
-        if (active) animateFLIP(section);
-      });
-    }
 
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
