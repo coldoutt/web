@@ -2,11 +2,19 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Фото коллекция</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; background: #111; color: #fff; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Arial, sans-serif; 
+      background: #111; 
+      color: #fff; 
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
     header { padding: 20px; text-align: center; background: #000; font-size: 24px; font-weight: bold; }
 
     .years {
@@ -79,8 +87,10 @@
       border-radius: 16px;
       cursor: pointer;
       animation: imgReveal 0.6s ease both;
-      transition: transform 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+      -webkit-transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
     }
 
     .gallery img:hover {
@@ -120,6 +130,7 @@
       justify-content: center;
       z-index: 1000;
       animation: fadeSlide 0.4s ease;
+      touch-action: none;
     }
 
     .lightbox.active { display: flex; }
@@ -192,26 +203,9 @@
   </nav>
 
   <main class="gallery-container">
-    <section class="gallery year active" data-year="2022">
-      <div class="tile big"><img src="https://picsum.photos/id/1015/800/800" /></div>
-      <div class="tile tall"><img src="https://picsum.photos/id/1025/600/800" /></div>
-      <div class="tile"><img src="https://picsum.photos/id/1035/600/400" /></div>
-      <div class="tile wide"><img src="https://picsum.photos/id/1045/800/400" /></div>
-    </section>
-
-    <section class="gallery year" data-year="2023">
-      <div class="tile wide"><img src="https://picsum.photos/id/1055/800/400" /></div>
-      <div class="tile"><img src="https://picsum.photos/id/1065/600/400" /></div>
-      <div class="tile tall"><img src="https://picsum.photos/id/1075/600/800" /></div>
-      <div class="tile big"><img src="https://picsum.photos/id/1085/800/800" /></div>
-    </section>
-
-    <section class="gallery year" data-year="2024">
-      <div class="tile big"><img src="https://picsum.photos/id/1095/800/800" /></div>
-      <div class="tile"><img src="https://picsum.photos/id/1105/600/400" /></div>
-      <div class="tile wide"><img src="https://picsum.photos/id/1115/800/400" /></div>
-      <div class="tile tall"><img src="https://picsum.photos/id/1125/600/800" /></div>
-    </section>
+    <section class="gallery year active" data-year="2022"></section>
+    <section class="gallery year" data-year="2023"></section>
+    <section class="gallery year" data-year="2024"></section>
   </main>
 
   <div class="lightbox" id="lightbox">
@@ -221,37 +215,38 @@
   <footer>© 2026 Фото коллекция</footer>
 
   <script>
+    // iOS Safari optimizations
+    document.addEventListener('gesturestart', e => e.preventDefault());
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
 
-    document.querySelectorAll('.gallery').forEach(gallery => {
-      gallery.addEventListener('click', e => {
-        if (e.target.tagName === 'IMG') {
-          lightboxImg.src = e.target.src;
-          lightbox.classList.add('active');
-        }
-      });
-    });
+    const data = {
+      2022: Array.from({ length: 60 }, (_, i) => `https://picsum.photos/seed/2022-${i}/800/600`),
+      2023: Array.from({ length: 70 }, (_, i) => `https://picsum.photos/seed/2023-${i}/800/600`),
+      2024: Array.from({ length: 80 }, (_, i) => `https://picsum.photos/seed/2024-${i}/800/600`)
+    };
 
-    lightbox.addEventListener('click', () => {
-      lightbox.classList.remove('active');
-      lightboxImg.src = '';
-    });
-
-    const buttons = document.querySelectorAll('.years button');
-    const years = document.querySelectorAll('.year');
+    function createTile(src) {
+      const div = document.createElement('div');
+      div.className = 'tile';
+      const img = document.createElement('img');
+      img.src = src;
+      img.loading = 'lazy';
+      div.appendChild(img);
+      return div;
+    }
 
     function randomizeTiles(section) {
-      const tiles = [...section.querySelectorAll('.tile')];
-      const classes = ['', 'wide', 'tall', 'big'];
-
+      const tiles = [...section.children];
       tiles.forEach(tile => tile.className = 'tile');
-
       tiles.forEach(tile => {
         const rnd = Math.random();
-        if (rnd > 0.85) tile.classList.add('big');
-        else if (rnd > 0.6) tile.classList.add('wide');
-        else if (rnd > 0.35) tile.classList.add('tall');
+        if (rnd > 0.88) tile.classList.add('big');
+        else if (rnd > 0.65) tile.classList.add('wide');
+        else if (rnd > 0.4) tile.classList.add('tall');
       });
     }
 
@@ -278,10 +273,30 @@
       });
     }
 
+    document.querySelectorAll('.year').forEach(section => {
+      const year = section.dataset.year;
+      data[year].forEach(src => section.appendChild(createTile(src)));
+      randomizeTiles(section);
+
+      section.addEventListener('click', e => {
+        if (e.target.tagName === 'IMG') {
+          lightboxImg.src = e.target.src;
+          lightbox.classList.add('active');
+        }
+      });
+    });
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      lightboxImg.src = '';
+    });
+
+    const buttons = document.querySelectorAll('.years button');
+    const years = document.querySelectorAll('.year');
+
     buttons.forEach(btn => {
       btn.addEventListener('click', () => {
         const year = btn.dataset.year;
-
         buttons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
@@ -292,9 +307,6 @@
         });
       });
     });
-
-    // initial random layout
-    document.querySelectorAll('.year').forEach(section => randomizeTiles(section));
   </script>
 </body>
 </html>
