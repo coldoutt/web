@@ -1,14 +1,115 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <title>Мой сайт</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Фото коллекция</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #000;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.05);
+      opacity: 0.85;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .lightbox img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 12px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #888;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Привет, мир!</h1>
-  <button onclick="sayHi()">Нажми меня!</button>
+  <header>Моя фото коллекция</header>
 
-  <script src="script.js"></script>
+  <main class="gallery">
+    <!-- Замените src на свои изображения -->
+    <img src="https://picsum.photos/id/1015/600/400" alt="Фото 1" />
+    <img src="https://picsum.photos/id/1025/600/400" alt="Фото 2" />
+    <img src="https://picsum.photos/id/1035/600/400" alt="Фото 3" />
+    <img src="https://picsum.photos/id/1045/600/400" alt="Фото 4" />
+    <img src="https://picsum.photos/id/1055/600/400" alt="Фото 5" />
+    <img src="https://picsum.photos/id/1065/600/400" alt="Фото 6" />
+  </main>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <footer>© 2026 Фото коллекция</footer>
+
+  <script>
+    const images = document.querySelectorAll('.gallery img');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+
+    images.forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('active');
+      });
+    });
+
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('active');
+      lightboxImg.src = '';
+    });
+  </script>
 </body>
 </html>
