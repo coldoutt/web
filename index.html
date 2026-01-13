@@ -86,9 +86,14 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      transition: opacity 0.4s ease;
+      opacity: 0;
     }
 
-    .lightbox.active { display: flex; }
+    .lightbox.active { 
+      display: flex; 
+      opacity: 1;
+    }
 
     .lightbox img {
       max-width: 92vw;
@@ -146,25 +151,25 @@
     data[year].forEach(src => section.appendChild(createTile(src)));
 
     section.addEventListener('click', e => {
-      if (e.target.tagName === 'IMG') {
-        const rect = e.target.getBoundingClientRect();
-        lastRect = rect;
-        lastScrollY = window.scrollY;
-        lastScrollX = window.scrollX;
+      if (e.target.tagName !== 'IMG') return;
 
-        lightboxImg.src = e.target.src;
-        lightbox.classList.add('active');
+      const rect = e.target.getBoundingClientRect();
+      lastRect = rect;
+      lastScrollY = window.scrollY;
+      lastScrollX = window.scrollX;
 
-        const dx = rect.left + rect.width / 2 - window.innerWidth / 2;
-        const dy = rect.top + rect.height / 2 - window.innerHeight / 2;
-        const scale = rect.width / window.innerWidth;
+      lightboxImg.src = e.target.src;
+      lightbox.classList.add('active');
 
-        lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+      const dx = rect.left + rect.width / 2 - window.innerWidth / 2;
+      const dy = rect.top + rect.height / 2 - window.innerHeight / 2;
+      const scale = rect.width / window.innerWidth;
 
-        requestAnimationFrame(() => {
-          lightboxImg.style.transform = 'translate(0,0) scale(1)';
-        });
-      }
+      lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+      requestAnimationFrame(() => {
+        lightboxImg.style.transform = 'translate(0,0) scale(1)';
+      });
     });
   });
 
@@ -174,11 +179,35 @@
       return;
     }
 
-    const dx = (lastRect.left + lastScrollX) + lastRect.width / 2 - (window.innerWidth / 2 + window.scrollX);
-    const dy = (lastRect.top + lastScrollY) + lastRect.height / 2 - (window.innerHeight / 2 + window.scrollY);
-    const scale = lastRect.width / window.innerWidth;
+    const scrollChanged =
+      window.scrollY !== lastScrollY || window.scrollX !== lastScrollX;
 
-    lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+    if (scrollChanged) {
+      lightbox.style.opacity = '0';
+      setTimeout(() => {
+        lightbox.classList.remove('active');
+        lightbox.style.opacity = '';
+        lightboxImg.style.transform = '';
+        lightboxImg.src = '';
+        lastRect = null;
+      }, 400);
+      return;
+    }
+
+    const lbRect = lightboxImg.getBoundingClientRect();
+
+    const scaleX = lastRect.width / lbRect.width;
+    const scaleY = lastRect.height / lbRect.height;
+
+    const dx =
+      (lastRect.left + lastScrollX) + lastRect.width / 2 -
+      (lbRect.left + lbRect.width / 2 + window.scrollX);
+
+    const dy =
+      (lastRect.top + lastScrollY) + lastRect.height / 2 -
+      (lbRect.top + lbRect.height / 2 + window.scrollY);
+
+    lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
 
     setTimeout(() => {
       lightbox.classList.remove('active');
