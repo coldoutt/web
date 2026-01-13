@@ -93,6 +93,7 @@
     .lightbox img {
       max-width: 92vw;
       max-height: 92vh;
+      transform-origin: center center;
       transition: transform 0.5s cubic-bezier(.4,0,.2,1);
     }
   </style>
@@ -126,6 +127,9 @@
 
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightbox-img');
+  let lastRect = null;
+  let lastScrollY = 0;
+  let lastScrollX = 0;
 
   function createTile(src) {
     const div = document.createElement('div');
@@ -144,6 +148,10 @@
     section.addEventListener('click', e => {
       if (e.target.tagName === 'IMG') {
         const rect = e.target.getBoundingClientRect();
+        lastRect = rect;
+        lastScrollY = window.scrollY;
+        lastScrollX = window.scrollX;
+
         lightboxImg.src = e.target.src;
         lightbox.classList.add('active');
 
@@ -161,9 +169,23 @@
   });
 
   lightbox.addEventListener('click', () => {
-    lightbox.classList.remove('active');
-    lightboxImg.style.transform = '';
-    lightboxImg.src = '';
+    if (!lastRect) {
+      lightbox.classList.remove('active');
+      return;
+    }
+
+    const dx = (lastRect.left + lastScrollX) + lastRect.width / 2 - (window.innerWidth / 2 + window.scrollX);
+    const dy = (lastRect.top + lastScrollY) + lastRect.height / 2 - (window.innerHeight / 2 + window.scrollY);
+    const scale = lastRect.width / window.innerWidth;
+
+    lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+    setTimeout(() => {
+      lightbox.classList.remove('active');
+      lightboxImg.style.transform = '';
+      lightboxImg.src = '';
+      lastRect = null;
+    }, 500);
   });
 
   const buttons = document.querySelectorAll('.years button');
