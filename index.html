@@ -15,13 +15,14 @@
       -webkit-font-smoothing: antialiased;
       overscroll-behavior: none;
     }
-    header { padding: 16px; text-align: center; background: #000; font-size: 18px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
+
+    header { height: 20px; }
 
     .years {
       display: flex;
       justify-content: center;
       gap: 14px;
-      padding: 20px;
+      padding: 16px;
       position: sticky;
       top: 0;
       background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.6), transparent);
@@ -33,9 +34,7 @@
       background: transparent;
       color: rgba(255,255,255,0.5);
       border: none;
-      padding: 6px 10px;
       cursor: pointer;
-      font-weight: 500;
       font-size: 15px;
       letter-spacing: 0.15em;
       transition: color 0.3s ease, transform 0.3s ease;
@@ -46,273 +45,139 @@
       transform: scale(1.15);
     }
 
-    .years button:hover {
-      color: #fff;
-    }
-
-    .years button.active {
-      background: #fff;
-      color: #000;
-      box-shadow: 0 10px 30px rgba(255,255,255,0.35);
-    }
-
-    .years button:hover {
-      transform: translateY(-2px) scale(1.05);
-    }
-
-    .years button.active,
-    .years button:hover {
-      background: #fff;
-      color: #000;
-    }
-
     .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      grid-auto-rows: auto;
-      gap: 16px;
+      column-count: 4;
+      column-gap: 16px;
       padding: 20px;
+      width: 100%;
     }
 
-    .tile {
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tile.wide { grid-column: span 2; }
-    .tile.tall { grid-row: span 2; }
-    .tile.big { grid-column: span 2; grid-row: span 2; }
+    @media (max-width: 1024px) { .gallery { column-count: 3; } }
+    @media (max-width: 768px) { .gallery { column-count: 2; } }
+    @media (max-width: 420px) { .gallery { column-count: 1; } }
 
     .tile {
-      transition: transform 0.6s cubic-bezier(.4,0,.2,1), opacity 0.6s;
-      will-change: transform;
+      break-inside: avoid;
+      margin-bottom: 16px;
     }
 
     .gallery img {
       width: 100%;
       height: auto;
-      object-fit: contain;
+      display: block;
       cursor: pointer;
-      animation: imgReveal 0.6s ease both;
       transition: transform 0.35s ease, opacity 0.35s ease;
-      -webkit-transform: translateZ(0);
-      -webkit-backface-visibility: hidden;
     }
 
     .gallery img:hover {
-      transform: translateY(-8px) scale(1.03);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-      filter: brightness(1.1);
+      transform: scale(1.04);
+      opacity: 0.9;
     }
 
-    .gallery img:hover { transform: scale(1.05); opacity: 0.85; }
-
-    .year {
-      display: none;
-      animation: fadeSlide 0.6s ease;
-    }
-
-    .year.active { display: grid; }
-
-    @keyframes fadeSlide {
-      0% { opacity: 0; transform: translateY(40px) scale(0.96); filter: blur(6px); }
-      60% { opacity: 1; transform: translateY(-6px) scale(1.01); filter: blur(0); }
-      100% { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    @keyframes imgReveal {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    .year { display: none; }
+    .year.active { display: block; }
 
     .lightbox {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(0,0,0,0.85), #000);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(20px);
       display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
-      animation: fadeSlide 0.4s ease;
-      touch-action: none;
     }
 
     .lightbox.active { display: flex; }
-    .lightbox img { max-width: 90%; max-height: 90%;  }
 
-    footer { text-align: center; padding: 15px; color: #888; font-size: 14px; }
-  
-
-    /* 📱 Mobile адаптация */
-    @media (max-width: 768px) {
-      header { font-size: 20px; padding: 16px; }
-
-      .years {
-        gap: 8px;
-        padding: 12px 10px;
-        overflow-x: auto;
-        justify-content: flex-start;
-      }
-
-      .years button {
-        flex-shrink: 0;
-        padding: 8px 14px;
-        font-size: 14px;
-      }
-
-      .gallery {
-        grid-template-columns: repeat(2, 1fr);
-        grid-auto-rows: 140px;
-        gap: 12px;
-        padding: 14px;
-      }
-
-      .tile.wide,
-      .tile.big {
-        grid-column: span 2;
-      }
-
-      .tile.tall,
-      .tile.big {
-        grid-row: span 2;
-      }
-
-      .gallery img:hover {
-        transform: none;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-        filter: none;
-      }
-    }
-
-    @media (max-width: 420px) {
-      .gallery {
-        grid-template-columns: 1fr;
-        grid-auto-rows: 180px;
-      }
-
-      .tile {
-        grid-column: span 1 !important;
-        grid-row: span 1 !important;
-      }
+    .lightbox img {
+      max-width: 92vw;
+      max-height: 92vh;
+      transition: transform 0.5s cubic-bezier(.4,0,.2,1);
     }
   </style>
 </head>
 <body>
-  <header></header>
 
-  <nav class="years">
-    <button data-year="2022" class="active">2022</button>
-    <button data-year="2023">2023</button>
-    <button data-year="2024">2024</button>
-  </nav>
+<header></header>
 
-  <main class="gallery-container">
-    <section class="gallery year active" data-year="2022"></section>
-    <section class="gallery year" data-year="2023"></section>
-    <section class="gallery year" data-year="2024"></section>
-  </main>
+<nav class="years">
+  <button data-year="2022" class="active">2022</button>
+  <button data-year="2023">2023</button>
+  <button data-year="2024">2024</button>
+</nav>
 
-  <div class="lightbox" id="lightbox">
-    <img id="lightbox-img" src="" alt="" />
-  </div>
+<main>
+  <section class="gallery year active" data-year="2022"></section>
+  <section class="gallery year" data-year="2023"></section>
+  <section class="gallery year" data-year="2024"></section>
+</main>
 
-  <footer>© 2026 Фото коллекция</footer>
+<div class="lightbox" id="lightbox">
+  <img id="lightbox-img" />
+</div>
 
-  <script>
-    // iOS Safari optimizations
-    document.addEventListener('gesturestart', e => e.preventDefault());
+<script>
+  const data = {
+    2022: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2022-${i}/800/600`),
+    2023: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2023-${i}/800/600`),
+    2024: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2024-${i}/800/600`)
+  };
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
 
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
+  function createTile(src) {
+    const div = document.createElement('div');
+    div.className = 'tile';
+    const img = document.createElement('img');
+    img.src = src;
+    img.loading = 'lazy';
+    div.appendChild(img);
+    return div;
+  }
 
-    const data = {
-      2022: Array.from({ length: 60 }, (_, i) => `https://picsum.photos/seed/2022-${i}/800/600`),
-      2023: Array.from({ length: 70 }, (_, i) => `https://picsum.photos/seed/2023-${i}/800/600`),
-      2024: Array.from({ length: 80 }, (_, i) => `https://picsum.photos/seed/2024-${i}/800/600`)
-    };
+  document.querySelectorAll('.year').forEach(section => {
+    const year = section.dataset.year;
+    data[year].forEach(src => section.appendChild(createTile(src)));
 
-    function createTile(src) {
-      const div = document.createElement('div');
-      div.className = 'tile';
-      const img = document.createElement('img');
-      img.src = src;
-      img.loading = 'lazy';
-      div.appendChild(img);
-      return div;
-    }
+    section.addEventListener('click', e => {
+      if (e.target.tagName === 'IMG') {
+        const rect = e.target.getBoundingClientRect();
+        lightboxImg.src = e.target.src;
+        lightbox.classList.add('active');
 
-    function randomizeTiles(section) {
-      const tiles = [...section.children];
-      tiles.forEach(tile => tile.className = 'tile');
-      tiles.forEach(tile => {
-        const rnd = Math.random();
-        if (rnd > 0.88) tile.classList.add('big');
-        else if (rnd > 0.65) tile.classList.add('wide');
-        else if (rnd > 0.4) tile.classList.add('tall');
-      });
-    }
+        const dx = rect.left + rect.width / 2 - window.innerWidth / 2;
+        const dy = rect.top + rect.height / 2 - window.innerHeight / 2;
+        const scale = rect.width / window.innerWidth;
 
-    function animateFLIP(section) {
-      const tiles = [...section.children];
-      const first = tiles.map(t => t.getBoundingClientRect());
+        lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
 
-      randomizeTiles(section);
-
-      requestAnimationFrame(() => {
-        tiles.forEach((tile, i) => {
-          const last = tile.getBoundingClientRect();
-          const dx = first[i].left - last.left;
-          const dy = first[i].top - last.top;
-
-          tile.style.transform = `translate(${dx}px, ${dy}px)`;
-          tile.style.transition = 'none';
-
-          requestAnimationFrame(() => {
-            tile.style.transform = '';
-            tile.style.transition = 'transform 0.6s cubic-bezier(.4,0,.2,1)';
-          });
+        requestAnimationFrame(() => {
+          lightboxImg.style.transform = 'translate(0,0) scale(1)';
         });
-      });
-    }
-
-    document.querySelectorAll('.year').forEach(section => {
-      const year = section.dataset.year;
-      data[year].forEach(src => section.appendChild(createTile(src)));
-      randomizeTiles(section);
-
-      section.addEventListener('click', e => {
-        if (e.target.tagName === 'IMG') {
-          lightboxImg.src = e.target.src;
-          lightbox.classList.add('active');
-        }
-      });
+      }
     });
+  });
 
-    lightbox.addEventListener('click', () => {
-      lightbox.classList.remove('active');
-      lightboxImg.src = '';
+  lightbox.addEventListener('click', () => {
+    lightbox.classList.remove('active');
+    lightboxImg.style.transform = '';
+    lightboxImg.src = '';
+  });
+
+  const buttons = document.querySelectorAll('.years button');
+  const years = document.querySelectorAll('.year');
+
+  buttons.forEach((btn, index) => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      years.forEach(y => y.classList.remove('active'));
+      years[index].classList.add('active');
     });
+  });
+</script>
 
-    const buttons = document.querySelectorAll('.years button');
-    const years = document.querySelectorAll('.year');
-
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const year = btn.dataset.year;
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        years.forEach(section => {
-          const active = section.dataset.year === year;
-          section.classList.toggle('active', active);
-          if (active) animateFLIP(section);
-        });
-      });
-    });
-  </script>
 </body>
 </html>
