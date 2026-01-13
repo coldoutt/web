@@ -9,13 +9,13 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', Arial, sans-serif; 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
       background: #111; 
       color: #fff; 
       -webkit-font-smoothing: antialiased;
       overscroll-behavior: none;
     }
-    header { padding: 20px; text-align: center; background: #000; font-size: 24px; font-weight: bold; }
+    header { padding: 16px; text-align: center; background: #000; font-size: 18px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
 
     .years {
       display: flex;
@@ -30,15 +30,24 @@
     }
 
     .years button {
-      background: rgba(255,255,255,0.08);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 10px 20px;
-      border-radius: 999px;
+      background: transparent;
+      color: rgba(255,255,255,0.5);
+      border: none;
+      padding: 6px 10px;
       cursor: pointer;
       font-weight: 500;
-      letter-spacing: 0.5px;
-      transition: all 0.4s ease;
+      font-size: 15px;
+      letter-spacing: 0.15em;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+
+    .years button.active {
+      color: #fff;
+      transform: scale(1.15);
+    }
+
+    .years button:hover {
+      color: #fff;
     }
 
     .years button.active {
@@ -60,7 +69,7 @@
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      grid-auto-rows: 180px;
+      grid-auto-rows: auto;
       gap: 16px;
       padding: 20px;
     }
@@ -68,7 +77,6 @@
     .tile {
       position: relative;
       overflow: hidden;
-      border-radius: 16px;
     }
 
     .tile.wide { grid-column: span 2; }
@@ -82,13 +90,11 @@
 
     .gallery img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 16px;
+      height: auto;
+      object-fit: contain;
       cursor: pointer;
       animation: imgReveal 0.6s ease both;
-      transition: transform 0.35s ease, box-shadow 0.35s ease;
-      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+      transition: transform 0.35s ease, opacity 0.35s ease;
       -webkit-transform: translateZ(0);
       -webkit-backface-visibility: hidden;
     }
@@ -134,7 +140,7 @@
     }
 
     .lightbox.active { display: flex; }
-    .lightbox img { max-width: 90%; max-height: 90%; border-radius: 12px; }
+    .lightbox img { max-width: 90%; max-height: 90%;  }
 
     footer { text-align: center; padding: 15px; color: #888; font-size: 14px; }
   
@@ -194,7 +200,7 @@
   </style>
 </head>
 <body>
-  <header>Моя фото коллекция</header>
+  <header></header>
 
   <nav class="years">
     <button data-year="2022" class="active">2022</button>
