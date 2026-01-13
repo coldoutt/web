@@ -5,24 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Фото коллекция</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; }
+    header { padding: 20px; text-align: center; background: #000; font-size: 24px; font-weight: bold; }
+
+    .years {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px;
     }
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
+    .years button {
+      background: #222;
       color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
     }
 
-    header {
-      padding: 20px;
-      text-align: center;
-      background: #000;
-      font-size: 24px;
-      font-weight: bold;
+    .years button.active,
+    .years button:hover {
+      background: #fff;
+      color: #000;
     }
 
     .gallery {
@@ -41,12 +48,20 @@
       transition: transform 0.3s, opacity 0.3s;
     }
 
-    .gallery img:hover {
-      transform: scale(1.05);
-      opacity: 0.85;
+    .gallery img:hover { transform: scale(1.05); opacity: 0.85; }
+
+    .year {
+      display: none;
+      animation: fadeSlide 0.6s ease;
     }
 
-    /* Lightbox */
+    .year.active { display: grid; }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .lightbox {
       position: fixed;
       inset: 0;
@@ -57,35 +72,39 @@
       z-index: 1000;
     }
 
-    .lightbox img {
-      max-width: 90%;
-      max-height: 90%;
-      border-radius: 12px;
-    }
+    .lightbox.active { display: flex; }
+    .lightbox img { max-width: 90%; max-height: 90%; border-radius: 12px; }
 
-    .lightbox.active {
-      display: flex;
-    }
-
-    footer {
-      text-align: center;
-      padding: 15px;
-      color: #888;
-      font-size: 14px;
-    }
+    footer { text-align: center; padding: 15px; color: #888; font-size: 14px; }
   </style>
 </head>
 <body>
   <header>Моя фото коллекция</header>
 
-  <main class="gallery">
-    <!-- Замените src на свои изображения -->
-    <img src="https://picsum.photos/id/1015/600/400" alt="Фото 1" />
-    <img src="https://picsum.photos/id/1025/600/400" alt="Фото 2" />
-    <img src="https://picsum.photos/id/1035/600/400" alt="Фото 3" />
-    <img src="https://picsum.photos/id/1045/600/400" alt="Фото 4" />
-    <img src="https://picsum.photos/id/1055/600/400" alt="Фото 5" />
-    <img src="https://picsum.photos/id/1065/600/400" alt="Фото 6" />
+  <nav class="years">
+    <button data-year="2022" class="active">2022</button>
+    <button data-year="2023">2023</button>
+    <button data-year="2024">2024</button>
+  </nav>
+
+  <main class="gallery-container">
+    <section class="gallery year active" data-year="2022">
+      <img src="https://picsum.photos/id/1015/600/400" />
+      <img src="https://picsum.photos/id/1025/600/400" />
+      <img src="https://picsum.photos/id/1035/600/400" />
+    </section>
+
+    <section class="gallery year" data-year="2023">
+      <img src="https://picsum.photos/id/1045/600/400" />
+      <img src="https://picsum.photos/id/1055/600/400" />
+      <img src="https://picsum.photos/id/1065/600/400" />
+    </section>
+
+    <section class="gallery year" data-year="2024">
+      <img src="https://picsum.photos/id/1075/600/400" />
+      <img src="https://picsum.photos/id/1085/600/400" />
+      <img src="https://picsum.photos/id/1095/600/400" />
+    </section>
   </main>
 
   <div class="lightbox" id="lightbox">
@@ -99,16 +118,34 @@
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
 
-    images.forEach(img => {
-      img.addEventListener('click', () => {
-        lightboxImg.src = img.src;
-        lightbox.classList.add('active');
+    document.querySelectorAll('.gallery').forEach(gallery => {
+      gallery.addEventListener('click', e => {
+        if (e.target.tagName === 'IMG') {
+          lightboxImg.src = e.target.src;
+          lightbox.classList.add('active');
+        }
       });
     });
 
     lightbox.addEventListener('click', () => {
       lightbox.classList.remove('active');
       lightboxImg.src = '';
+    });
+
+    const buttons = document.querySelectorAll('.years button');
+    const years = document.querySelectorAll('.year');
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const year = btn.dataset.year;
+
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        years.forEach(section => {
+          section.classList.toggle('active', section.dataset.year === year);
+        });
+      });
     });
   </script>
 </body>
