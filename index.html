@@ -10,28 +10,30 @@
     body { background-color: #000; overflow-x: hidden; }
     section { scroll-margin-top: 100px; }
     
+    /* Улучшенная анимация появления */
     .reveal {
       opacity: 0;
-      transform: translateY(30px);
-      transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
+      transform: translateY(50px);
+      transition: opacity 1.2s cubic-bezier(0.2, 1, 0.3, 1), 
+                  transform 1.2s cubic-bezier(0.2, 1, 0.3, 1);
+      will-change: transform, opacity;
     }
-    .reveal.active { opacity: 1; transform: translateY(0); }
+    
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Задержка для папок внутри года, чтобы они шли после заголовка */
+    .delay-child { transition-delay: 0.2s; }
 
     .masonry-grid { column-count: 2; column-gap: 0.75rem; }
     @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
     @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
     .masonry-item { break-inside: avoid; margin-bottom: 0.75rem; background: #0a0a0a; }
 
-    /* Увеличенная кнопка Вверх */
-    #back-to-top { 
-      opacity: 0; 
-      visibility: hidden; 
-      transition: all 0.4s ease; 
-    }
-    #back-to-top.visible { 
-      opacity: 1; 
-      visibility: visible; 
-    }
+    #back-to-top { opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+    #back-to-top.visible { opacity: 1; visibility: visible; }
 
     #lightbox {
       display: none;
@@ -78,15 +80,11 @@
   <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20">
     <div class="flex justify-between items-baseline mb-16 max-w-[1600px] mx-auto">
       <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
-      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close archive</button>
+      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
     </div>
-    
     <div id="gallery-grid" class="masonry-grid max-w-[1600px] mx-auto pb-20"></div>
-
-    <button id="back-to-top" onclick="galleryScrollTop()" class="fixed bottom-10 right-10 w-16 h-16 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:border-white/40 hover:bg-black/80 transition-all z-[110] shadow-2xl">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 15l-6-6-6 6"/>
-      </svg>
+    <button id="back-to-top" onclick="galleryScrollTop()" class="fixed bottom-10 right-10 w-16 h-16 rounded-full border border-white/10 bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:border-white/40 transition-all z-[110]">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 15l-6-6-6 6"/></svg>
     </button>
   </div>
 
@@ -116,10 +114,12 @@
         section.id = item.year;
         section.className = 'mb-24';
         section.innerHTML = `
-          <div class="border-b border-zinc-900 pb-2 mb-10 reveal"><h2 class="text-5xl md:text-6xl font-extralight text-white tracking-tighter">${item.year}</h2></div>
+          <div class="border-b border-zinc-900 pb-2 mb-10 reveal">
+            <h2 class="text-5xl md:text-6xl font-extralight text-white tracking-tighter">${item.year}</h2>
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             ${item.trips.map(trip => `
-              <div onclick="openGallery('${trip.title}')" class="group cursor-pointer reveal">
+              <div onclick="openGallery('${trip.title}')" class="group cursor-pointer reveal delay-child">
                 <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-4 relative">
                   <img src="${trip.img}?q=80&w=800" class="object-cover w-full h-full grayscale group-hover:grayscale-0 transition-all duration-1000">
                 </div>
@@ -130,16 +130,18 @@
         `;
         container.appendChild(section);
       });
-      handleReveal();
-    }
+      
+      // Инициализируем проверку видимости сразу и при скролле
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      }, { threshold: 0.1 });
 
-    function handleReveal() {
-      document.querySelectorAll(".reveal").forEach(el => {
-        if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add("active");
-      });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     }
-
-    window.addEventListener("scroll", handleReveal);
 
     const galleryOverlay = document.getElementById('gallery-overlay');
     const btnUp = document.getElementById('back-to-top');
@@ -163,25 +165,19 @@
         item.className = 'masonry-item overflow-hidden';
         const ratio = ratios[Math.floor(Math.random() * ratios.length)];
         const paddingBottom = (1 / ratio) * 100;
-
         const wrapper = document.createElement('div');
         wrapper.className = 'relative w-full bg-zinc-900/50';
         wrapper.style.paddingBottom = `${paddingBottom}%`;
-
         const src = `https://picsum.photos/seed/${title + i}/1200/${Math.round(1200/ratio)}`;
         const img = document.createElement('img');
         img.src = src;
-        // УБРАН ЭФФЕКТ SCALE ПРИ НАВЕДЕНИИ
         img.className = 'absolute top-0 left-0 w-full h-full opacity-0 transition-all duration-1000 cursor-zoom-in';
         img.style.objectFit = 'cover';
-
         img.onload = function() {
           this.classList.replace('opacity-0', 'opacity-60');
           this.classList.add('hover:opacity-100');
         };
-
         img.onclick = () => openLightbox(src);
-
         wrapper.appendChild(img);
         item.appendChild(wrapper);
         grid.appendChild(item);
@@ -194,6 +190,13 @@
     function closeGallery() { galleryOverlay.classList.add('hidden'); document.body.style.overflow = 'auto'; }
     function openLightbox(src) { lightboxImg.src = src; lightbox.classList.add('active'); }
     function closeLightbox() { lightbox.classList.remove('active'); }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (lightbox.classList.contains('active')) closeLightbox();
+        else if (!galleryOverlay.classList.contains('hidden')) closeGallery();
+      }
+    });
 
     init();
   </script>
