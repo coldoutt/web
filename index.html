@@ -1,311 +1,139 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Фото коллекция</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>coldout — photo archive</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif;
-      background: #0e0e0e;
-      color: #fff;
-      overscroll-behavior: none;
-    }
-
-    /* HEADER / YEARS */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      padding: 20px 24px;
-      display: flex;
-      justify-content: flex-end;
-      background: linear-gradient(to bottom, rgba(14,14,14,.95), rgba(14,14,14,.6), transparent);
-      backdrop-filter: blur(12px);
-    }
-
-    .years {
-      display: flex;
-      gap: 18px;
-      font-size: 13px;
-      letter-spacing: .25em;
-      text-transform: uppercase;
-    }
-
-    .years button {
-      background: none;
-      border: none;
-      color: rgba(255,255,255,.45);
-      cursor: pointer;
-    }
-
-    .years button.active { color: #fff; }
-
-    /* MAIN GALLERY */
-    main {
-      padding: 40px 24px 80px;
-    }
-
-    .year { display: none; }
-    .year.active { display: block; }
-
-    .gallery {
-      column-count: 3;
-      column-gap: 24px;
-    }
-
-    @media (max-width: 1024px) { .gallery { column-count: 2; } }
-    @media (max-width: 520px)  { .gallery { column-count: 1; } }
-
-    /* FOLDER TILE */
-    .folder {
-      break-inside: avoid;
-      margin-bottom: 32px;
-      cursor: pointer;
-    }
-
-    .folder-preview {
-      position: relative;
-      aspect-ratio: 3 / 2;
-      overflow: hidden;
-      background: #000;
-    }
-
-    .folder-preview img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0;
-      animation: folderCarousel 6s infinite;
-    }
-
-    .folder-preview img:nth-child(1) { animation-delay: 0s; }
-    .folder-preview img:nth-child(2) { animation-delay: 2s; }
-    .folder-preview img:nth-child(3) { animation-delay: 4s; }
-
-    @keyframes folderCarousel {
-      0% { opacity: 0; }
-      10% { opacity: 1; }
-      35% { opacity: 1; }
-      45% { opacity: 0; }
-      100% { opacity: 0; }
-    }
-
-    .folder-title {
-      margin-top: 10px;
-      font-size: 13px;
-      letter-spacing: .18em;
-      opacity: .85;
-      text-transform: uppercase;
-    }
-
-    /* FOLDER VIEW */
-    .folder-view {
-      position: fixed;
-      inset: 0;
-      background: #0e0e0e;
-      z-index: 200;
-      display: none;
-      opacity: 0;
-      transform: scale(.97);
-      transition: opacity .45s ease, transform .45s cubic-bezier(.4,0,.2,1);
-      overflow-y: auto;
-    }
-
-    .folder-view.active {
-      display: block;
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .folder-header {
-      position: sticky;
-      top: 0;
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      background: linear-gradient(to bottom, rgba(14,14,14,.95), rgba(14,14,14,.6), transparent);
-      backdrop-filter: blur(12px);
-      z-index: 10;
-    }
-
-    .back-btn {
-      font-size: 12px;
-      letter-spacing: .2em;
-      opacity: .6;
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-
-    .folder-header-title {
-      font-size: 13px;
-      letter-spacing: .25em;
-      text-transform: uppercase;
-    }
-
-    .folder-gallery {
-      padding: 40px 24px 80px;
-      column-count: 3;
-      column-gap: 24px;
-    }
-
-    @media (max-width: 1024px) { .folder-gallery { column-count: 2; } }
-    @media (max-width: 520px)  { .folder-gallery { column-count: 1; } }
-
-    .tile { break-inside: avoid; margin-bottom: 24px; }
-
-    .tile img {
-      width: 100%;
-      height: auto;
-      display: block;
-      cursor: zoom-in;
-    }
-
-    /* LIGHTBOX */
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      background: rgba(14,14,14,.85);
-      backdrop-filter: blur(24px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 500;
-    }
-
-    .lightbox.active { display: flex; }
-
-    .lightbox img {
-      max-width: 92vw;
-      max-height: 92vh;
-      transition: transform .4s cubic-bezier(.4,0,.2,1);
-    }
-
+    html { scroll-behavior: smooth; }
+    body { background-color: #000; overflow-x: hidden; }
+    section { scroll-margin-top: 100px; }
+    .gallery-enter { animation: fadeIn 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
-<body>
+<body class="text-zinc-400 font-sans selection:bg-zinc-800">
 
-<header>
-  <nav class="years">
-    <button class="active">2023</button>
-    <button>2024</button>
+  <nav class="fixed top-0 left-0 w-full px-6 py-4 md:px-10 flex flex-row justify-between items-center z-50 bg-black/60 backdrop-blur-md border-b border-white/5">
+    <div class="text-white tracking-[0.2em] lowercase font-light text-sm md:text-base cursor-pointer" onclick="closeGallery()">
+      coldout
+    </div>
+    <div class="flex items-center space-x-4 md:space-x-6 text-[10px] tracking-[0.1em] lowercase font-light overflow-x-auto">
+      <a href="#2026" class="text-zinc-400 hover:text-white transition-colors">2026</a>
+      <a href="#2025" class="text-zinc-400 hover:text-white transition-colors">2025</a>
+      <a href="#2024" class="text-zinc-400 hover:text-white transition-colors">2024</a>
+      <a href="#2023" class="text-zinc-400 hover:text-white transition-colors">2023</a>
+      <a href="#2022" class="text-zinc-400 hover:text-white transition-colors">2022</a>
+      <a href="#2021" class="text-zinc-400 hover:text-white transition-colors">2021</a>
+      <a href="#2020" class="text-zinc-400 hover:text-white transition-colors">2020</a>
+    </div>
   </nav>
-</header>
 
-<main>
-  <section class="gallery year active" data-year="2023"></section>
-  <section class="gallery year" data-year="2024"></section>
-</main>
-
-<div class="folder-view" id="folderView">
-  <div class="folder-header">
-    <span class="back-btn" id="backBtn">← Back</span>
-    <span class="folder-header-title" id="folderTitle"></span>
+  <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20 gallery-enter">
+    <div class="flex justify-between items-baseline mb-16 max-w-[1600px] mx-auto">
+      <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
+      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
+    </div>
+    <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-[1600px] mx-auto pb-20"></div>
   </div>
-  <div class="folder-gallery" id="folderGallery"></div>
-</div>
 
-<div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
+  <main id="main-content" class="pt-24 px-6 md:px-20 max-w-[1600px] mx-auto transition-opacity duration-500">
+    
+    <div id="years-container"></div>
 
-<script>
-const data = {
-  2023: [
-    { title: 'Малайзия', photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/my${i}/900/600`) },
-    { title: 'Япония',  photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/jp${i}/900/600`) }
-  ],
-  2024: [
-    { title: 'Италия', photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/it${i}/900/600`) }
-  ]
-};
+  </main>
 
-const folderView = document.getElementById('folderView');
-const folderGallery = document.getElementById('folderGallery');
-const folderTitle = document.getElementById('folderTitle');
-const backBtn = document.getElementById('backBtn');
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightboxImg');
+  <footer class="p-20 text-center border-t border-zinc-950">
+    <div class="text-[9px] lowercase tracking-[0.5em] text-zinc-800">coldout &copy; 2026</div>
+  </footer>
 
-function createFolder(folder) {
-  const el = document.createElement('div');
-  el.className = 'folder';
+  <script>
+    const archiveData = [
+      { year: "2026", trips: [
+        { title: "lofoten islands", img: "https://images.unsplash.com/photo-1534067783941-51c9c239ecfd" },
+        { title: "swiss alps", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4" }
+      ]},
+      { year: "2025", trips: [
+        { title: "atacama desert", img: "https://images.unsplash.com/photo-1444464666168-49d633b867ad" },
+        { title: "madeira coast", img: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b" }
+      ]},
+      { year: "2024", trips: [
+        { title: "kyoto gardens", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e" },
+        { title: "tokyo nights", img: "https://images.unsplash.com/photo-1542051841857-5f90071e7989" }
+      ]},
+      { year: "2023", trips: [
+        { title: "dolomites", img: "https://images.unsplash.com/photo-1531366930499-41f667534ae2" },
+        { title: "icelandic fog", img: "https://images.unsplash.com/photo-1504893524553-f8591ce26c58" }
+      ]},
+      { year: "2022", trips: [
+        { title: "namibia dunes", img: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9" },
+        { title: "patagonia peaks", img: "https://images.unsplash.com/photo-1517154421773-0529f29ea451" }
+      ]},
+      { year: "2021", trips: [
+        { title: "scottish highlands", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
+        { title: "nordic cabin", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e" }
+      ]},
+      { year: "2020", trips: [
+        { title: "empty venice", img: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9" },
+        { title: "quiet lakes", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470" }
+      ]}
+    ];
 
-  const preview = document.createElement('div');
-  preview.className = 'folder-preview';
+    function init() {
+      const container = document.getElementById('years-container');
+      archiveData.forEach(item => {
+        const section = document.createElement('section');
+        section.id = item.year;
+        section.className = 'mb-24';
+        
+        section.innerHTML = `
+          <div class="border-b border-zinc-900 pb-2 mb-10">
+            <h2 class="text-5xl md:text-6xl font-extralight text-white tracking-tighter">${item.year}</h2>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            ${item.trips.map(trip => `
+              <div onclick="openGallery('${trip.title}', '${trip.img}')" class="group cursor-pointer">
+                <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-4 relative">
+                  <img src="${trip.img}?q=80&w=800" class="object-cover w-full h-full grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000">
+                </div>
+                <h3 class="text-[10px] lowercase tracking-[0.2em] text-zinc-600 group-hover:text-white transition-colors italic">${trip.title} — archive</h3>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(section);
+      });
+    }
 
-  folder.photos.slice(0, 3).forEach(src => {
-    const img = document.createElement('img');
-    img.src = src;
-    preview.appendChild(img);
-  });
+    function openGallery(title, baseImg) {
+      const overlay = document.getElementById('gallery-overlay');
+      const grid = document.getElementById('gallery-grid');
+      const gTitle = document.getElementById('gallery-title');
 
-  const title = document.createElement('div');
-  title.className = 'folder-title';
-  title.textContent = folder.title;
+      gTitle.innerText = title;
+      grid.innerHTML = '';
 
-  el.append(preview, title);
-  el.onclick = () => openFolder(folder, preview);
+      for (let i = 1; i <= 50; i++) {
+        const div = document.createElement('div');
+        div.className = 'aspect-[3/4] bg-zinc-950 overflow-hidden';
+        // Использование разных изображений через случайные ID из Unsplash Source
+        const randomId = Math.floor(Math.random() * 1000);
+        div.innerHTML = `<img src="https://picsum.photos/seed/${title + i}/600/800" class="object-cover w-full h-full opacity-60 hover:opacity-100 hover:scale-105 transition-all duration-700 cursor-crosshair">`;
+        grid.appendChild(div);
+      }
 
-  return el;
-}
+      overlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      overlay.scrollTo(0, 0);
+    }
 
-function openFolder(folder, previewEl) {
-  const rect = previewEl.getBoundingClientRect();
+    function closeGallery() {
+      document.getElementById('gallery-overlay').classList.add('hidden');
+      document.body.style.overflow = 'auto';
+    }
 
-  folderTitle.textContent = folder.title;
-  folderGallery.innerHTML = '';
-
-  folder.photos.forEach(src => {
-    const tile = document.createElement('div');
-    tile.className = 'tile';
-    const img = document.createElement('img');
-    img.src = src;
-    img.onclick = () => openLightbox(img);
-    tile.appendChild(img);
-    folderGallery.appendChild(tile);
-  });
-
-  folderView.style.transformOrigin = `${rect.left + rect.width / 2}px ${rect.top + rect.height / 2}px`;
-  folderView.classList.add('active');
-}
-
-function openLightbox(img) {
-  lightboxImg.src = img.src;
-  lightbox.classList.add('active');
-}
-
-lightbox.onclick = () => {
-  lightbox.classList.remove('active');
-  lightboxImg.src = '';
-};
-
-backBtn.onclick = () => {
-  folderView.classList.remove('active');
-};
-
-Object.keys(data).forEach(year => {
-  const section = document.querySelector(`.year[data-year="${year}"]`);
-  data[year].forEach(folder => section.appendChild(createFolder(folder)));
-});
-
-const yearButtons = document.querySelectorAll('.years button');
-const years = document.querySelectorAll('.year');
-
-yearButtons.forEach((btn, i) => {
-  btn.onclick = () => {
-    yearButtons.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    years.forEach(y => y.classList.remove('active'));
-    years[i].classList.add('active');
-  };
-});
-</script>
-
+    init();
+  </script>
 </body>
 </html>
