@@ -11,6 +11,10 @@
     section { scroll-margin-top: 100px; }
     .gallery-enter { animation: fadeIn 0.6s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    /* Скрываем скроллбар для эстетики, но оставляем функционал */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #18181b; }
   </style>
 </head>
 <body class="text-zinc-400 font-sans selection:bg-zinc-800">
@@ -39,9 +43,7 @@
   </div>
 
   <main id="main-content" class="pt-24 px-6 md:px-20 max-w-[1600px] mx-auto transition-opacity duration-500">
-    
     <div id="years-container"></div>
-
   </main>
 
   <footer class="p-20 text-center border-t border-zinc-950">
@@ -94,10 +96,12 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             ${item.trips.map(trip => `
               <div onclick="openGallery('${trip.title}', '${trip.img}')" class="group cursor-pointer">
-                <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-4 relative">
+                <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-5 relative">
                   <img src="${trip.img}?q=80&w=800" class="object-cover w-full h-full grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000">
                 </div>
-                <h3 class="text-[10px] lowercase tracking-[0.2em] text-zinc-600 group-hover:text-white transition-colors italic">${trip.title} — archive</h3>
+                <h3 class="text-xs md:text-sm lowercase tracking-[0.3em] font-medium text-zinc-500 group-hover:text-white transition-colors duration-500 italic">
+                  ${trip.title} — collection
+                </h3>
               </div>
             `).join('')}
           </div>
@@ -117,8 +121,6 @@
       for (let i = 1; i <= 50; i++) {
         const div = document.createElement('div');
         div.className = 'aspect-[3/4] bg-zinc-950 overflow-hidden';
-        // Использование разных изображений через случайные ID из Unsplash Source
-        const randomId = Math.floor(Math.random() * 1000);
         div.innerHTML = `<img src="https://picsum.photos/seed/${title + i}/600/800" class="object-cover w-full h-full opacity-60 hover:opacity-100 hover:scale-105 transition-all duration-700 cursor-crosshair">`;
         grid.appendChild(div);
       }
