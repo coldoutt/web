@@ -9,9 +9,49 @@
     html { scroll-behavior: smooth; }
     body { background-color: #000; overflow-x: hidden; }
     section { scroll-margin-top: 100px; }
-    .gallery-enter { animation: fadeIn 0.6s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    /* Скрываем скроллбар для эстетики, но оставляем функционал */
+    
+    /* Анимация появления контента */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .reveal.active { opacity: 1; transform: translateY(0); }
+
+    /* Masonry сетка */
+    .masonry-grid { column-count: 2; column-gap: 0.75rem; }
+    @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+    @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+
+    .masonry-item { break-inside: avoid; margin-bottom: 0.75rem; }
+
+    /* Кнопка Вверх */
+    #back-to-top { opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+    #back-to-top.visible { opacity: 1; visibility: visible; }
+
+    /* Lightbox эффект */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(15px);
+      cursor: zoom-out;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #lightbox.active { display: flex; opacity: 1; }
+    #lightbox img { 
+      max-width: 90%; 
+      max-height: 90%; 
+      object-fit: contain; 
+      box-shadow: 0 0 50px rgba(0,0,0,0.5);
+      transform: scale(0.95);
+      transition: transform 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    #lightbox.active img { transform: scale(1); }
+
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #18181b; }
@@ -34,12 +74,19 @@
     </div>
   </nav>
 
-  <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20 gallery-enter">
+  <div id="lightbox" class="items-center justify-center" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Zoomed view">
+  </div>
+
+  <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20">
     <div class="flex justify-between items-baseline mb-16 max-w-[1600px] mx-auto">
       <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
-      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
+      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close archive</button>
     </div>
-    <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 max-w-[1600px] mx-auto pb-20"></div>
+    <div id="gallery-grid" class="masonry-grid max-w-[1600px] mx-auto pb-20"></div>
+    <button id="back-to-top" onclick="galleryScrollTop()" class="fixed bottom-10 right-10 w-12 h-12 rounded-full border border-white/10 bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:border-white/40 transition-all z-[110]">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+    </button>
   </div>
 
   <main id="main-content" class="pt-24 px-6 md:px-20 max-w-[1600px] mx-auto transition-opacity duration-500">
@@ -52,34 +99,13 @@
 
   <script>
     const archiveData = [
-      { year: "2026", trips: [
-        { title: "lofoten islands", img: "https://images.unsplash.com/photo-1534067783941-51c9c239ecfd" },
-        { title: "swiss alps", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4" }
-      ]},
-      { year: "2025", trips: [
-        { title: "atacama desert", img: "https://images.unsplash.com/photo-1444464666168-49d633b867ad" },
-        { title: "madeira coast", img: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b" }
-      ]},
-      { year: "2024", trips: [
-        { title: "kyoto gardens", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e" },
-        { title: "tokyo nights", img: "https://images.unsplash.com/photo-1542051841857-5f90071e7989" }
-      ]},
-      { year: "2023", trips: [
-        { title: "dolomites", img: "https://images.unsplash.com/photo-1531366930499-41f667534ae2" },
-        { title: "icelandic fog", img: "https://images.unsplash.com/photo-1504893524553-f8591ce26c58" }
-      ]},
-      { year: "2022", trips: [
-        { title: "namibia dunes", img: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9" },
-        { title: "patagonia peaks", img: "https://images.unsplash.com/photo-1517154421773-0529f29ea451" }
-      ]},
-      { year: "2021", trips: [
-        { title: "scottish highlands", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" },
-        { title: "nordic cabin", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e" }
-      ]},
-      { year: "2020", trips: [
-        { title: "empty venice", img: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9" },
-        { title: "quiet lakes", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470" }
-      ]}
+      { year: "2026", trips: [{ title: "lofoten islands", img: "https://images.unsplash.com/photo-1534067783941-51c9c239ecfd" }, { title: "swiss alps", img: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4" }]},
+      { year: "2025", trips: [{ title: "atacama desert", img: "https://images.unsplash.com/photo-1444464666168-49d633b867ad" }, { title: "madeira coast", img: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b" }]},
+      { year: "2024", trips: [{ title: "kyoto gardens", img: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e" }, { title: "tokyo nights", img: "https://images.unsplash.com/photo-1542051841857-5f90071e7989" }]},
+      { year: "2023", trips: [{ title: "dolomites", img: "https://images.unsplash.com/photo-1531366930499-41f667534ae2" }, { title: "icelandic fog", img: "https://images.unsplash.com/photo-1504893524553-f8591ce26c58" }]},
+      { year: "2022", trips: [{ title: "namibia dunes", img: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9" }, { title: "patagonia peaks", img: "https://images.unsplash.com/photo-1517154421773-0529f29ea451" }]},
+      { year: "2021", trips: [{ title: "highlands", img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb" }, { title: "nordic cabin", img: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e" }]},
+      { year: "2020", trips: [{ title: "venice", img: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9" }, { title: "quiet lakes", img: "https://images.unsplash.com/photo-1501785888041-af3ef285b470" }]}
     ];
 
     function init() {
@@ -88,51 +114,70 @@
         const section = document.createElement('section');
         section.id = item.year;
         section.className = 'mb-24';
-        
         section.innerHTML = `
-          <div class="border-b border-zinc-900 pb-2 mb-10">
-            <h2 class="text-5xl md:text-6xl font-extralight text-white tracking-tighter">${item.year}</h2>
-          </div>
+          <div class="border-b border-zinc-900 pb-2 mb-10 reveal"><h2 class="text-5xl md:text-6xl font-extralight text-white tracking-tighter">${item.year}</h2></div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             ${item.trips.map(trip => `
-              <div onclick="openGallery('${trip.title}', '${trip.img}')" class="group cursor-pointer">
-                <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-5 relative">
+              <div onclick="openGallery('${trip.title}')" class="group cursor-pointer reveal">
+                <div class="aspect-[4/5] bg-zinc-900 overflow-hidden mb-4 relative">
                   <img src="${trip.img}?q=80&w=800" class="object-cover w-full h-full grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000">
                 </div>
-                <h3 class="text-xs md:text-sm lowercase tracking-[0.3em] font-medium text-zinc-500 group-hover:text-white transition-colors duration-500 italic">
-                  ${trip.title} — collection
-                </h3>
+                <h3 class="text-[10px] lowercase tracking-[0.2em] text-zinc-600 group-hover:text-white transition-colors duration-500 italic">${trip.title} — archive</h3>
               </div>
             `).join('')}
           </div>
         `;
         container.appendChild(section);
       });
+      handleReveal();
     }
 
-    function openGallery(title, baseImg) {
-      const overlay = document.getElementById('gallery-overlay');
-      const grid = document.getElementById('gallery-grid');
-      const gTitle = document.getElementById('gallery-title');
+    function handleReveal() {
+      document.querySelectorAll(".reveal").forEach(el => {
+        if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add("active");
+      });
+    }
 
-      gTitle.innerText = title;
+    window.addEventListener("scroll", handleReveal);
+
+    const galleryOverlay = document.getElementById('gallery-overlay');
+    const btnUp = document.getElementById('back-to-top');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+
+    galleryOverlay.addEventListener('scroll', () => {
+      btnUp.classList.toggle('visible', galleryOverlay.scrollTop > 600);
+    });
+
+    function galleryScrollTop() { galleryOverlay.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    function openGallery(title) {
+      const grid = document.getElementById('gallery-grid');
+      document.getElementById('gallery-title').innerText = title;
       grid.innerHTML = '';
 
       for (let i = 1; i <= 50; i++) {
-        const div = document.createElement('div');
-        div.className = 'aspect-[3/4] bg-zinc-950 overflow-hidden';
-        div.innerHTML = `<img src="https://picsum.photos/seed/${title + i}/600/800" class="object-cover w-full h-full opacity-60 hover:opacity-100 hover:scale-105 transition-all duration-700 cursor-crosshair">`;
-        grid.appendChild(div);
+        const item = document.createElement('div');
+        item.className = 'masonry-item bg-zinc-950 overflow-hidden';
+        const h = [400, 600, 800, 900][Math.floor(Math.random() * 4)];
+        const src = `https://picsum.photos/seed/${title + i}/1200/${h*2}`; // Большее разрешение для зума
+        
+        item.innerHTML = `<img src="${src}" onclick="openLightbox('${src}')" class="w-full h-auto block opacity-60 hover:opacity-100 hover:scale-[1.02] transition-all duration-700 cursor-zoom-in">`;
+        grid.appendChild(item);
       }
-
-      overlay.classList.remove('hidden');
+      galleryOverlay.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
-      overlay.scrollTo(0, 0);
     }
 
-    function closeGallery() {
-      document.getElementById('gallery-overlay').classList.add('hidden');
-      document.body.style.overflow = 'auto';
+    function closeGallery() { galleryOverlay.classList.add('hidden'); document.body.style.overflow = 'auto'; }
+
+    function openLightbox(src) {
+      lightboxImg.src = src;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
     }
 
     init();
