@@ -4,230 +4,307 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Фото коллекция</title>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-      background: #111; 
-      color: #fff; 
-      -webkit-font-smoothing: antialiased;
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', Arial, sans-serif;
+      background: #0e0e0e;
+      color: #fff;
       overscroll-behavior: none;
     }
 
-    header { height: 20px; }
+    /* HEADER / YEARS */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: flex-end;
+      background: linear-gradient(to bottom, rgba(14,14,14,.95), rgba(14,14,14,.6), transparent);
+      backdrop-filter: blur(12px);
+    }
 
     .years {
       display: flex;
-      justify-content: center;
-      gap: 14px;
-      padding: 16px;
-      position: sticky;
-      top: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0.6), transparent);
-      backdrop-filter: blur(8px);
-      z-index: 10;
+      gap: 18px;
+      font-size: 13px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
     }
 
     .years button {
-      background: transparent;
-      color: rgba(255,255,255,0.5);
+      background: none;
       border: none;
+      color: rgba(255,255,255,.45);
       cursor: pointer;
-      font-size: 15px;
-      letter-spacing: 0.15em;
-      transition: color 0.3s ease, transform 0.3s ease;
     }
 
-    .years button.active {
-      color: #fff;
-      transform: scale(1.15);
-    }
+    .years button.active { color: #fff; }
 
-    .gallery {
-      column-count: 4;
-      column-gap: 16px;
-      padding: 20px;
-      width: 100%;
-    }
-
-    @media (max-width: 1024px) { .gallery { column-count: 3; } }
-    @media (max-width: 768px) { .gallery { column-count: 2; } }
-    @media (max-width: 420px) { .gallery { column-count: 1; } }
-
-    .tile {
-      break-inside: avoid;
-      margin-bottom: 16px;
-    }
-
-    .gallery img {
-      width: 100%;
-      height: auto;
-      display: block;
-      cursor: pointer;
-      transition: transform 0.35s ease, opacity 0.35s ease;
-    }
-
-    .gallery img:hover {
-      transform: scale(1.04);
-      opacity: 0.9;
+    /* MAIN GALLERY */
+    main {
+      padding: 40px 24px 80px;
     }
 
     .year { display: none; }
     .year.active { display: block; }
 
+    .gallery {
+      column-count: 3;
+      column-gap: 24px;
+    }
+
+    @media (max-width: 1024px) { .gallery { column-count: 2; } }
+    @media (max-width: 520px)  { .gallery { column-count: 1; } }
+
+    /* FOLDER TILE */
+    .folder {
+      break-inside: avoid;
+      margin-bottom: 32px;
+      cursor: pointer;
+    }
+
+    .folder-preview {
+      position: relative;
+      aspect-ratio: 3 / 2;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .folder-preview img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      animation: folderCarousel 6s infinite;
+    }
+
+    .folder-preview img:nth-child(1) { animation-delay: 0s; }
+    .folder-preview img:nth-child(2) { animation-delay: 2s; }
+    .folder-preview img:nth-child(3) { animation-delay: 4s; }
+
+    @keyframes folderCarousel {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      35% { opacity: 1; }
+      45% { opacity: 0; }
+      100% { opacity: 0; }
+    }
+
+    .folder-title {
+      margin-top: 10px;
+      font-size: 13px;
+      letter-spacing: .18em;
+      opacity: .85;
+      text-transform: uppercase;
+    }
+
+    /* FOLDER VIEW */
+    .folder-view {
+      position: fixed;
+      inset: 0;
+      background: #0e0e0e;
+      z-index: 200;
+      display: none;
+      opacity: 0;
+      transform: scale(.97);
+      transition: opacity .45s ease, transform .45s cubic-bezier(.4,0,.2,1);
+      overflow-y: auto;
+    }
+
+    .folder-view.active {
+      display: block;
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .folder-header {
+      position: sticky;
+      top: 0;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(to bottom, rgba(14,14,14,.95), rgba(14,14,14,.6), transparent);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+    }
+
+    .back-btn {
+      font-size: 12px;
+      letter-spacing: .2em;
+      opacity: .6;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .folder-header-title {
+      font-size: 13px;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+    }
+
+    .folder-gallery {
+      padding: 40px 24px 80px;
+      column-count: 3;
+      column-gap: 24px;
+    }
+
+    @media (max-width: 1024px) { .folder-gallery { column-count: 2; } }
+    @media (max-width: 520px)  { .folder-gallery { column-count: 1; } }
+
+    .tile { break-inside: avoid; margin-bottom: 24px; }
+
+    .tile img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: zoom-in;
+    }
+
+    /* LIGHTBOX */
     .lightbox {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(20px);
+      background: rgba(14,14,14,.85);
+      backdrop-filter: blur(24px);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.4s ease;
-      opacity: 0;
+      z-index: 500;
     }
 
-    .lightbox.active { 
-      display: flex; 
-      opacity: 1;
-    }
+    .lightbox.active { display: flex; }
 
     .lightbox img {
       max-width: 92vw;
       max-height: 92vh;
-      transform-origin: center center;
-      transition: transform 0.5s cubic-bezier(.4,0,.2,1);
+      transition: transform .4s cubic-bezier(.4,0,.2,1);
     }
+
   </style>
 </head>
 <body>
 
-<header></header>
-
-<nav class="years">
-  <button data-year="2022" class="active">2022</button>
-  <button data-year="2023">2023</button>
-  <button data-year="2024">2024</button>
-</nav>
+<header>
+  <nav class="years">
+    <button class="active">2023</button>
+    <button>2024</button>
+  </nav>
+</header>
 
 <main>
-  <section class="gallery year active" data-year="2022"></section>
-  <section class="gallery year" data-year="2023"></section>
+  <section class="gallery year active" data-year="2023"></section>
   <section class="gallery year" data-year="2024"></section>
 </main>
 
-<div class="lightbox" id="lightbox">
-  <img id="lightbox-img" />
+<div class="folder-view" id="folderView">
+  <div class="folder-header">
+    <span class="back-btn" id="backBtn">← Back</span>
+    <span class="folder-header-title" id="folderTitle"></span>
+  </div>
+  <div class="folder-gallery" id="folderGallery"></div>
 </div>
 
+<div class="lightbox" id="lightbox"><img id="lightboxImg"></div>
+
 <script>
-  const data = {
-    2022: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2022-${i}/800/600`),
-    2023: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2023-${i}/800/600`),
-    2024: Array.from({ length: 30 }, (_, i) => `https://picsum.photos/seed/2024-${i}/800/600`)
-  };
+const data = {
+  2023: [
+    { title: 'Малайзия', photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/my${i}/900/600`) },
+    { title: 'Япония',  photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/jp${i}/900/600`) }
+  ],
+  2024: [
+    { title: 'Италия', photos: Array.from({ length: 24 }, (_, i) => `https://picsum.photos/seed/it${i}/900/600`) }
+  ]
+};
 
-  const lightbox = document.getElementById('lightbox');
-  const lightboxImg = document.getElementById('lightbox-img');
-  let lastRect = null;
-  let lastScrollY = 0;
-  let lastScrollX = 0;
+const folderView = document.getElementById('folderView');
+const folderGallery = document.getElementById('folderGallery');
+const folderTitle = document.getElementById('folderTitle');
+const backBtn = document.getElementById('backBtn');
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
 
-  function createTile(src) {
-    const div = document.createElement('div');
-    div.className = 'tile';
+function createFolder(folder) {
+  const el = document.createElement('div');
+  el.className = 'folder';
+
+  const preview = document.createElement('div');
+  preview.className = 'folder-preview';
+
+  folder.photos.slice(0, 3).forEach(src => {
     const img = document.createElement('img');
     img.src = src;
-    img.loading = 'lazy';
-    div.appendChild(img);
-    return div;
-  }
-
-  document.querySelectorAll('.year').forEach(section => {
-    const year = section.dataset.year;
-    data[year].forEach(src => section.appendChild(createTile(src)));
-
-    section.addEventListener('click', e => {
-      if (e.target.tagName !== 'IMG') return;
-
-      const rect = e.target.getBoundingClientRect();
-      lastRect = rect;
-      lastScrollY = window.scrollY;
-      lastScrollX = window.scrollX;
-
-      lightboxImg.src = e.target.src;
-      lightbox.classList.add('active');
-
-      const dx = rect.left + rect.width / 2 - window.innerWidth / 2;
-      const dy = rect.top + rect.height / 2 - window.innerHeight / 2;
-      const scale = rect.width / window.innerWidth;
-
-      lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
-
-      requestAnimationFrame(() => {
-        lightboxImg.style.transform = 'translate(0,0) scale(1)';
-      });
-    });
+    preview.appendChild(img);
   });
 
-  lightbox.addEventListener('click', () => {
-    if (!lastRect) {
-      lightbox.classList.remove('active');
-      return;
-    }
+  const title = document.createElement('div');
+  title.className = 'folder-title';
+  title.textContent = folder.title;
 
-    const scrollChanged =
-      window.scrollY !== lastScrollY || window.scrollX !== lastScrollX;
+  el.append(preview, title);
+  el.onclick = () => openFolder(folder, preview);
 
-    if (scrollChanged) {
-      lightbox.style.opacity = '0';
-      setTimeout(() => {
-        lightbox.classList.remove('active');
-        lightbox.style.opacity = '';
-        lightboxImg.style.transform = '';
-        lightboxImg.src = '';
-        lastRect = null;
-      }, 400);
-      return;
-    }
+  return el;
+}
 
-    const lbRect = lightboxImg.getBoundingClientRect();
+function openFolder(folder, previewEl) {
+  const rect = previewEl.getBoundingClientRect();
 
-    const scaleX = lastRect.width / lbRect.width;
-    const scaleY = lastRect.height / lbRect.height;
+  folderTitle.textContent = folder.title;
+  folderGallery.innerHTML = '';
 
-    const dx =
-      (lastRect.left + lastScrollX) + lastRect.width / 2 -
-      (lbRect.left + lbRect.width / 2 + window.scrollX);
-
-    const dy =
-      (lastRect.top + lastScrollY) + lastRect.height / 2 -
-      (lbRect.top + lbRect.height / 2 + window.scrollY);
-
-    lightboxImg.style.transform = `translate(${dx}px, ${dy}px) scale(${scaleX}, ${scaleY})`;
-
-    setTimeout(() => {
-      lightbox.classList.remove('active');
-      lightboxImg.style.transform = '';
-      lightboxImg.src = '';
-      lastRect = null;
-    }, 500);
+  folder.photos.forEach(src => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    const img = document.createElement('img');
+    img.src = src;
+    img.onclick = () => openLightbox(img);
+    tile.appendChild(img);
+    folderGallery.appendChild(tile);
   });
 
-  const buttons = document.querySelectorAll('.years button');
-  const years = document.querySelectorAll('.year');
+  folderView.style.transformOrigin = `${rect.left + rect.width / 2}px ${rect.top + rect.height / 2}px`;
+  folderView.classList.add('active');
+}
 
-  buttons.forEach((btn, index) => {
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      years.forEach(y => y.classList.remove('active'));
-      years[index].classList.add('active');
-    });
-  });
+function openLightbox(img) {
+  lightboxImg.src = img.src;
+  lightbox.classList.add('active');
+}
+
+lightbox.onclick = () => {
+  lightbox.classList.remove('active');
+  lightboxImg.src = '';
+};
+
+backBtn.onclick = () => {
+  folderView.classList.remove('active');
+};
+
+Object.keys(data).forEach(year => {
+  const section = document.querySelector(`.year[data-year="${year}"]`);
+  data[year].forEach(folder => section.appendChild(createFolder(folder)));
+});
+
+const yearButtons = document.querySelectorAll('.years button');
+const years = document.querySelectorAll('.year');
+
+yearButtons.forEach((btn, i) => {
+  btn.onclick = () => {
+    yearButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    years.forEach(y => y.classList.remove('active'));
+    years[i].classList.add('active');
+  };
+});
 </script>
 
 </body>
