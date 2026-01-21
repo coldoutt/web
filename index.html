@@ -28,9 +28,11 @@
   </div>
 
   <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20">
-    <div class="flex justify-between items-baseline mb-16 max-w-[1600px] mx-auto">
-      <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
-      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
+    <div class="flex justify-between items-end mb-12 max-w-[1600px] mx-auto px-[4px] md:px-[10px]">
+      <h2 id="gallery-title" class="text-white text-3xl md:text-5xl font-thin lowercase tracking-tighter"></h2>
+      <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[10px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1 mb-1 md:mb-2">
+        закрыть
+      </button>
     </div>
     <div id="gallery-grid" class="grid-container max-w-[1600px]"></div>
   </div>
