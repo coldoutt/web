@@ -17,19 +17,40 @@
     }
     .reveal.active { opacity: 1; transform: translateY(0); }
 
+    /* Сетка с сохранением порядка и пропорций */
     .photo-grid { 
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem; /* Зазор между фото */
+      justify-content: flex-start;
     }
-    @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (min-width: 1024px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
     
+    /* Контейнер для фото в галерее */
     .photo-item { 
+      flex: 1 1 calc(50% - 1.5rem); /* 2 колонки на мобильных */
+      max-width: calc(50% - 0.75rem);
       background: #050505;
       position: relative;
-      aspect-ratio: 4/5;
-      overflow: hidden;
+    }
+    
+    @media (min-width: 768px) {
+      .photo-item { 
+        flex: 1 1 calc(33.333% - 1.5rem); 
+        max-width: calc(33.333% - 1rem); 
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .photo-item { 
+        flex: 1 1 calc(25% - 1.5rem); 
+        max-width: calc(25% - 1.15rem); 
+      }
+    }
+
+    .photo-item img {
+      width: 100%;
+      height: auto; /* Оригинальное соотношение сторон */
+      display: block;
     }
 
     #lightbox {
@@ -40,15 +61,15 @@
     #lightbox.active { display: flex; }
     #lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-    /* Минималистичный круглый лоадер */
+    /* Минималистичный круг без процентов */
     #loader-container {
       position: fixed; bottom: 30px; left: 30px;
-      width: 50px; height: 50px; z-index: 150;
+      width: 40px; height: 40px; z-index: 150;
       display: flex; align-items: center; justify-content: center;
       transition: opacity 0.5s ease;
     }
     .progress-ring__circle {
-      transition: stroke-dashoffset 0.35s;
+      transition: stroke-dashoffset 0.35s linear;
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
@@ -66,11 +87,10 @@
   </nav>
 
   <div id="loader-container" class="opacity-0">
-    <svg width="50" height="50">
-      <circle class="text-zinc-900" stroke="currentColor" stroke-width="2" fill="transparent" r="22" cx="25" cy="25"/>
-      <circle id="progress-circle" class="text-white progress-ring__circle" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="transparent" r="22" cx="25" cy="25"/>
+    <svg width="40" height="40">
+      <circle class="text-zinc-900" stroke="currentColor" stroke-width="1.5" fill="transparent" r="18" cx="20" cy="20"/>
+      <circle id="progress-circle" class="text-white progress-ring__circle" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="transparent" r="18" cx="20" cy="20"/>
     </svg>
-    <span id="loader-text" class="absolute text-[9px] text-white font-light">0%</span>
   </div>
 
   <div id="lightbox" onclick="closeLightbox()">
@@ -95,7 +115,6 @@
     const BRANCH = "main";
     const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/photo`;
 
-    // Настройка круга
     const circle = document.getElementById('progress-circle');
     const radius = circle.r.baseVal.value;
     const circumference = 2 * Math.PI * radius;
@@ -105,7 +124,6 @@
     function setProgress(percent) {
       const offset = circumference - (percent / 100) * circumference;
       circle.style.strokeDashoffset = offset;
-      document.getElementById('loader-text').innerText = `${Math.round(percent)}%`;
     }
 
     async function initSite() {
@@ -119,7 +137,7 @@
           const navLink = document.createElement('a');
           navLink.href = `#year-${year}`;
           navLink.innerText = year;
-          navLink.className = "hover:text-white transition-colors";
+          navLink.className = "hover:text-white transition-colors cursor-pointer";
           document.getElementById('nav-years').appendChild(navLink);
 
           const section = document.createElement('section');
@@ -167,14 +185,6 @@
       document.getElementById('gallery-overlay').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
-      const slots = [];
-      for (let i = 1; i <= count; i++) {
-        const item = document.createElement('div');
-        item.className = 'photo-item';
-        grid.appendChild(item);
-        slots.push(item);
-      }
-
       for (let i = 1; i <= count; i++) {
         const photoNum = String(i).padStart(2, '0');
         const fileName = `${year}_${folderNum}_${photoNum}.jpg`;
@@ -183,16 +193,22 @@
         await new Promise((resolve) => {
           const img = new Image();
           img.src = imgUrl;
-          img.className = 'w-full h-full object-cover opacity-0 transition-opacity duration-700 cursor-zoom-in block';
+          img.className = 'opacity-0 transition-opacity duration-700 cursor-zoom-in';
+          
           img.onload = () => {
-            slots[i-1].appendChild(img);
+            const item = document.createElement('div');
+            item.className = 'photo-item';
+            item.appendChild(img);
+            grid.appendChild(item);
+            
             setTimeout(() => img.classList.replace('opacity-0', 'opacity-60'), 10);
             img.classList.add('hover:opacity-100');
             img.onclick = () => openLightbox(imgUrl);
+            
             setProgress((i / count) * 100);
             resolve();
           };
-          img.onerror = () => { resolve(); };
+          img.onerror = () => resolve();
         });
       }
       setTimeout(() => loader.classList.add('opacity-0'), 800);
@@ -201,7 +217,6 @@
     function closeGallery() { 
       document.getElementById('gallery-overlay').classList.add('hidden'); 
       document.body.style.overflow = 'auto';
-      document.getElementById('loader-container').classList.add('opacity-0');
     }
     function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); }
     function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
