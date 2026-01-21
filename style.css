@@ -1,17 +1,32 @@
+/* Базовые настройки страницы */
 html { scroll-behavior: smooth; }
 body { background-color: #000; overflow-x: hidden; }
 
-/* Сетка Masonry */
-.grid-container { width: 100%; margin: 0 auto; }
+/* Сетка Masonry (Оригинальное соотношение сторон) */
+.grid-container { 
+  width: 100%; 
+  margin: 0 auto; 
+}
+
 .grid-item { 
   width: calc(50% - 10px); 
   margin-bottom: 20px;
   background: #050505;
 }
-@media (min-width: 768px) { .grid-item { width: calc(33.333% - 14px); } }
-@media (min-width: 1024px) { .grid-item { width: calc(25% - 15px); } }
 
-.grid-item.loading { aspect-ratio: 4/5; }
+@media (min-width: 768px) { 
+  .grid-item { width: calc(33.333% - 14px); } 
+}
+
+@media (min-width: 1024px) { 
+  .grid-item { width: calc(25% - 15px); } 
+}
+
+/* Эффекты для фотографий в сетке */
+.grid-item.loading { 
+  aspect-ratio: 4/5; 
+}
+
 .grid-item img { 
   width: 100%; 
   height: auto; 
@@ -20,71 +35,124 @@ body { background-color: #000; overflow-x: hidden; }
   transition: opacity 0.6s ease; 
   cursor: zoom-in;
 }
-.grid-item img.loaded { opacity: 0.6; }
-.grid-item img.loaded:hover { opacity: 1; }
 
-/* Общий стиль для плавающих UI элементов */
-.floating-ui {
-  position: fixed; bottom: 30px;
-  width: 44px; height: 44px; z-index: 160;
+.grid-item img.loaded { 
+  opacity: 0.6; 
+}
+
+.grid-item img.loaded:hover { 
+  opacity: 1; 
+}
+
+/* Единый стиль для плавающих UI элементов (Glassmorphism) */
+.floating-ui, .lightbox-close {
+  position: fixed;
+  width: 44px; 
+  height: 44px; 
+  z-index: 160;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
   transition: all 0.4s ease;
+  color: white;
 }
 
-#loader-container { left: 30px; opacity: 0; pointer-events: none; }
-#transparent_circle { color: transparent; }
+/* Лоадер (Твой стиль с прозрачным кругом) */
+#loader-container { 
+  bottom: 30px;
+  left: 30px; 
+  opacity: 0; 
+  pointer-events: none; 
+}
+
+#transparent_circle { 
+  color: transparent; 
+}
+
 .progress-ring__circle { 
   transition: stroke-dashoffset 0.3s linear; 
   transform: rotate(-90deg); 
   transform-origin: 50% 50%; 
 }
 
-#back-to-top { right: 30px; color: white; opacity: 0; visibility: hidden; cursor: pointer; }
-#back-to-top.visible { opacity: 1; visibility: visible; }
-#back-to-top:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.3); }
+/* Кнопка "Вверх" */
+#back-to-top { 
+  bottom: 30px;
+  right: 30px; 
+  opacity: 0; 
+  visibility: hidden; 
+  cursor: pointer; 
+}
 
-/* Лайтбокс */
+#back-to-top.visible { 
+  opacity: 1; 
+  visibility: visible; 
+}
+
+/* Ховер-эффект, общий для всех кнопок */
+#back-to-top:hover, .lightbox-close:hover { 
+  background: rgba(255, 255, 255, 0.15); 
+  border-color: rgba(255, 255, 255, 0.3); 
+}
+
+/* Лайтбокс (Просмотр фото) */
 #lightbox {
-  display: none; position: fixed; inset: 0; z-index: 200;
-  background: rgba(0,0,0,0.95); backdrop-filter: blur(20px);
+  display: none; 
+  position: fixed; 
+  inset: 0; 
+  z-index: 200;
+  background: rgba(0,0,0,0.95); 
+  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  cursor: zoom-out; align-items: center; justify-content: center;
+  cursor: zoom-out; 
+  align-items: center; 
+  justify-content: center;
 }
-#lightbox.active { display: flex; }
-#lightbox img { max-width: 95%; max-height: 95%; object-fit: contain; }
 
-/* Кнопка закрытия в лайтбоксе */
-.lightbox-close {
-  position: fixed; top: 30px; right: 30px;
-  width: 44px; height: 44px; z-index: 210;
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
+#lightbox.active { 
+  display: flex; 
 }
-.lightbox-close:hover {
-  color: white; background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: rotate(90deg);
+
+#lightbox img { 
+  max-width: 95%; 
+  max-height: 95%; 
+  object-fit: contain; 
+}
+
+/* Крестик закрытия в лайтбоксе (Анимация как у кнопки вверх) */
+.lightbox-close {
+  top: 30px; 
+  right: 30px;
+  z-index: 210;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Начальное состояние как у кнопки вверх */
 }
 
 @media (max-width: 768px) {
-  .lightbox-close { top: 20px; right: 20px; }
+  .lightbox-close { 
+    top: 20px; 
+    right: 20px; 
+  }
 }
 
-.reveal { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
-.reveal.active { opacity: 1; transform: translateY(0); }
+/* Анимация плавного появления секций лет */
+.reveal { 
+  opacity: 0; 
+  transform: translateY(30px); 
+  transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); 
+}
 
+.reveal.active { 
+  opacity: 1; 
+  transform: translateY(0); 
+}
+
+/* Тонкий кастомный скроллбар */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #18181b; }
