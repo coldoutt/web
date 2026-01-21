@@ -17,34 +17,19 @@
     }
     .reveal.active { opacity: 1; transform: translateY(0); }
 
-    /* Сетка с сохранением порядка и пропорций */
-    .photo-grid { 
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem; /* Зазор между фото */
-      justify-content: flex-start;
+    /* Masonry сетка через колонки */
+    .masonry-grid { 
+      column-count: 2; 
+      column-gap: 1rem;
     }
-    
-    /* Контейнер для фото в галерее */
+    @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
+    @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+
     .photo-item { 
-      flex: 1 1 calc(50% - 1.5rem); /* 2 колонки на мобильных */
-      max-width: calc(50% - 0.75rem);
+      break-inside: avoid;
+      margin-bottom: 1rem;
       background: #050505;
       position: relative;
-    }
-    
-    @media (min-width: 768px) {
-      .photo-item { 
-        flex: 1 1 calc(33.333% - 1.5rem); 
-        max-width: calc(33.333% - 1rem); 
-      }
-    }
-    
-    @media (min-width: 1024px) {
-      .photo-item { 
-        flex: 1 1 calc(25% - 1.5rem); 
-        max-width: calc(25% - 1.15rem); 
-      }
     }
 
     .photo-item img {
@@ -61,15 +46,16 @@
     #lightbox.active { display: flex; }
     #lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-    /* Минималистичный круг без процентов */
+    /* Круг загрузки в левом нижнем углу */
     #loader-container {
       position: fixed; bottom: 30px; left: 30px;
       width: 40px; height: 40px; z-index: 150;
       display: flex; align-items: center; justify-content: center;
       transition: opacity 0.5s ease;
+      pointer-events: none;
     }
     .progress-ring__circle {
-      transition: stroke-dashoffset 0.35s linear;
+      transition: stroke-dashoffset 0.3s linear;
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
@@ -102,7 +88,7 @@
       <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
       <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
     </div>
-    <div id="gallery-grid" class="photo-grid max-w-[1600px] mx-auto pb-20"></div>
+    <div id="gallery-grid" class="masonry-grid max-w-[1600px] mx-auto pb-20"></div>
   </div>
 
   <main id="main-content" class="pt-24 px-6 md:px-20 max-w-[1600px] mx-auto">
@@ -122,8 +108,7 @@
     circle.style.strokeDashoffset = circumference;
 
     function setProgress(percent) {
-      const offset = circumference - (percent / 100) * circumference;
-      circle.style.strokeDashoffset = offset;
+      circle.style.strokeDashoffset = circumference - (percent / 100) * circumference;
     }
 
     async function initSite() {
@@ -181,10 +166,10 @@
       document.getElementById('gallery-title').innerText = title;
       setProgress(0);
       loader.classList.remove('opacity-0');
-      
       document.getElementById('gallery-overlay').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
+      // Для сохранения порядка Masonry, мы загружаем всё и вставляем последовательно
       for (let i = 1; i <= count; i++) {
         const photoNum = String(i).padStart(2, '0');
         const fileName = `${year}_${folderNum}_${photoNum}.jpg`;
@@ -201,6 +186,7 @@
             item.appendChild(img);
             grid.appendChild(item);
             
+            // Плавное появление
             setTimeout(() => img.classList.replace('opacity-0', 'opacity-60'), 10);
             img.classList.add('hover:opacity-100');
             img.onclick = () => openLightbox(imgUrl);
@@ -208,7 +194,7 @@
             setProgress((i / count) * 100);
             resolve();
           };
-          img.onerror = () => resolve();
+          img.onerror = () => resolve(); // Пропускаем битые фото
         });
       }
       setTimeout(() => loader.classList.add('opacity-0'), 800);
@@ -218,8 +204,15 @@
       document.getElementById('gallery-overlay').classList.add('hidden'); 
       document.body.style.overflow = 'auto';
     }
-    function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); }
-    function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+    
+    function openLightbox(src) { 
+      document.getElementById('lightbox-img').src = src; 
+      document.getElementById('lightbox').classList.add('active'); 
+    }
+    
+    function closeLightbox() { 
+      document.getElementById('lightbox').classList.remove('active'); 
+    }
 
     initSite();
   </script>
