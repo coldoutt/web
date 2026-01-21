@@ -23,7 +23,7 @@ body { background-color: #000; overflow-x: hidden; }
 .grid-item img.loaded { opacity: 0.6; }
 .grid-item img.loaded:hover { opacity: 1; }
 
-/* Плавающие UI элементы */
+/* Общий стиль для плавающих UI элементов */
 .floating-ui {
   position: fixed; bottom: 30px;
   width: 44px; height: 44px; z-index: 160;
@@ -58,10 +58,33 @@ body { background-color: #000; overflow-x: hidden; }
 #lightbox.active { display: flex; }
 #lightbox img { max-width: 95%; max-height: 95%; object-fit: contain; }
 
+/* Кнопка закрытия в лайтбоксе */
+.lightbox-close {
+  position: fixed; top: 30px; right: 30px;
+  width: 44px; height: 44px; z-index: 210;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.lightbox-close:hover {
+  color: white; background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+@media (max-width: 768px) {
+  .lightbox-close { top: 20px; right: 20px; }
+}
+
 .reveal { opacity: 0; transform: translateY(30px); transition: all 1s cubic-bezier(0.2, 1, 0.3, 1); }
 .reveal.active { opacity: 1; transform: translateY(0); }
 
-/* Скроллбар */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #18181b; }
