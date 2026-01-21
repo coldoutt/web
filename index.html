@@ -17,17 +17,19 @@
     }
     .reveal.active { opacity: 1; transform: translateY(0); }
 
-    .masonry-grid { column-count: 2; column-gap: 0.75rem; }
-    @media (min-width: 768px) { .masonry-grid { column-count: 3; } }
-    @media (min-width: 1024px) { .masonry-grid { column-count: 4; } }
+    .photo-grid { 
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    @media (min-width: 768px) { .photo-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (min-width: 1024px) { .photo-grid { grid-template-columns: repeat(4, 1fr); } }
     
-    .masonry-item { 
-      break-inside: avoid; 
-      margin-bottom: 0.75rem; 
+    .photo-item { 
       background: #050505;
       position: relative;
-      aspect-ratio: 4/5; 
-      transition: aspect-ratio 0.3s ease;
+      aspect-ratio: 4/5;
+      overflow: hidden;
     }
 
     #lightbox {
@@ -38,12 +40,17 @@
     #lightbox.active { display: flex; }
     #lightbox img { max-width: 90%; max-height: 90%; object-fit: contain; }
 
-    /* Полоса прогресса */
-    #progress-bar {
-      position: fixed; top: 64px; left: 0; height: 1px;
-      background: #fff; width: 0%; z-index: 150;
-      transition: width 0.4s ease, opacity 0.4s ease;
-      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    /* Минималистичный круглый лоадер */
+    #loader-container {
+      position: fixed; bottom: 30px; left: 30px;
+      width: 50px; height: 50px; z-index: 150;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.5s ease;
+    }
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.35s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
     }
 
     ::-webkit-scrollbar { width: 4px; }
@@ -58,7 +65,13 @@
     <div id="nav-years" class="flex items-center space-x-4 md:space-x-6 text-[10px] tracking-[0.1em] lowercase font-light overflow-x-auto"></div>
   </nav>
 
-  <div id="progress-bar" class="opacity-0"></div>
+  <div id="loader-container" class="opacity-0">
+    <svg width="50" height="50">
+      <circle class="text-zinc-900" stroke="currentColor" stroke-width="2" fill="transparent" r="22" cx="25" cy="25"/>
+      <circle id="progress-circle" class="text-white progress-ring__circle" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="transparent" r="22" cx="25" cy="25"/>
+    </svg>
+    <span id="loader-text" class="absolute text-[9px] text-white font-light">0%</span>
+  </div>
 
   <div id="lightbox" onclick="closeLightbox()">
     <img id="lightbox-img" src="" alt="">
@@ -66,13 +79,10 @@
 
   <div id="gallery-overlay" class="hidden fixed inset-0 bg-black z-[100] overflow-y-auto p-6 md:p-20">
     <div class="flex justify-between items-baseline mb-16 max-w-[1600px] mx-auto">
-      <div class="flex items-baseline gap-4">
-        <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
-        <span id="gallery-counter" class="text-[10px] text-zinc-600 tracking-widest uppercase"></span>
-      </div>
+      <h2 id="gallery-title" class="text-white text-3xl font-thin lowercase tracking-tighter"></h2>
       <button onclick="closeGallery()" class="text-zinc-600 hover:text-white uppercase text-[9px] tracking-[0.3em] transition-colors border-b border-zinc-800 hover:border-white pb-1">close</button>
     </div>
-    <div id="gallery-grid" class="masonry-grid max-w-[1600px] mx-auto pb-20"></div>
+    <div id="gallery-grid" class="photo-grid max-w-[1600px] mx-auto pb-20"></div>
   </div>
 
   <main id="main-content" class="pt-24 px-6 md:px-20 max-w-[1600px] mx-auto">
@@ -85,6 +95,19 @@
     const BRANCH = "main";
     const RAW_BASE = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/${BRANCH}/photo`;
 
+    // Настройка круга
+    const circle = document.getElementById('progress-circle');
+    const radius = circle.r.baseVal.value;
+    const circumference = 2 * Math.PI * radius;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = circumference;
+
+    function setProgress(percent) {
+      const offset = circumference - (percent / 100) * circumference;
+      circle.style.strokeDashoffset = offset;
+      document.getElementById('loader-text').innerText = `${Math.round(percent)}%`;
+    }
+
     async function initSite() {
       const container = document.getElementById('years-container');
       try {
@@ -93,6 +116,12 @@
         const years = Object.keys(data).sort((a, b) => b - a);
 
         years.forEach(year => {
+          const navLink = document.createElement('a');
+          navLink.href = `#year-${year}`;
+          navLink.innerText = year;
+          navLink.className = "hover:text-white transition-colors";
+          document.getElementById('nav-years').appendChild(navLink);
+
           const section = document.createElement('section');
           section.id = `year-${year}`;
           section.className = 'mb-24 reveal';
@@ -123,32 +152,27 @@
           entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
         }, { threshold: 0.1 });
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
       } catch (e) { console.error(e); }
     }
 
     async function openGallery(title, year, folderFull, folderNum, count) {
       const grid = document.getElementById('gallery-grid');
-      const progressBar = document.getElementById('progress-bar');
-      const counter = document.getElementById('gallery-counter');
+      const loader = document.getElementById('loader-container');
       
-      document.getElementById('gallery-title').innerText = title;
       grid.innerHTML = '';
-      counter.innerText = `0 / ${count}`;
-      
-      // Показываем индикатор
-      progressBar.style.width = '0%';
-      progressBar.classList.remove('opacity-0');
+      document.getElementById('gallery-title').innerText = title;
+      setProgress(0);
+      loader.classList.remove('opacity-0');
       
       document.getElementById('gallery-overlay').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
 
-      const items = [];
+      const slots = [];
       for (let i = 1; i <= count; i++) {
         const item = document.createElement('div');
-        item.className = 'masonry-item';
+        item.className = 'photo-item';
         grid.appendChild(item);
-        items.push(item);
+        slots.push(item);
       }
 
       for (let i = 1; i <= count; i++) {
@@ -159,39 +183,26 @@
         await new Promise((resolve) => {
           const img = new Image();
           img.src = imgUrl;
-          img.className = 'w-full h-auto opacity-0 transition-opacity duration-700 cursor-zoom-in block';
-          
+          img.className = 'w-full h-full object-cover opacity-0 transition-opacity duration-700 cursor-zoom-in block';
           img.onload = () => {
-            items[i-1].style.aspectRatio = 'auto';
-            items[i-1].appendChild(img);
+            slots[i-1].appendChild(img);
             setTimeout(() => img.classList.replace('opacity-0', 'opacity-60'), 10);
             img.classList.add('hover:opacity-100');
             img.onclick = () => openLightbox(imgUrl);
-            
-            // Обновляем прогресс
-            const percent = (i / count) * 100;
-            progressBar.style.width = `${percent}%`;
-            counter.innerText = `${i} / ${count}`;
-            
+            setProgress((i / count) * 100);
             resolve();
           };
-          img.onerror = () => {
-            items[i-1].innerHTML = `<div class="text-[8px] p-4 text-zinc-800">Error: ${fileName}</div>`;
-            resolve(); 
-          };
+          img.onerror = () => { resolve(); };
         });
       }
-
-      // Скрываем полосу после завершения
-      setTimeout(() => progressBar.classList.add('opacity-0'), 500);
+      setTimeout(() => loader.classList.add('opacity-0'), 800);
     }
 
     function closeGallery() { 
       document.getElementById('gallery-overlay').classList.add('hidden'); 
       document.body.style.overflow = 'auto';
-      document.getElementById('progress-bar').classList.add('opacity-0');
+      document.getElementById('loader-container').classList.add('opacity-0');
     }
-    
     function openLightbox(src) { document.getElementById('lightbox-img').src = src; document.getElementById('lightbox').classList.add('active'); }
     function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
 
