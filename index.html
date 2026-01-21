@@ -1,4 +1,4 @@
-ader-container<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -11,7 +11,7 @@ ader-container<!DOCTYPE html>
     html { scroll-behavior: smooth; }
     body { background-color: #000; overflow-x: hidden; }
     
-    /* Сетка */
+    /* Сетка Masonry */
     .grid-container { width: 100%; margin: 0 auto; }
     .grid-item { 
       width: calc(50% - 12px); 
@@ -26,7 +26,7 @@ ader-container<!DOCTYPE html>
     .grid-item img.loaded { opacity: 0.6; }
     .grid-item img.loaded:hover { opacity: 1; }
 
-    /* Общий стиль для плавающих кнопок/индикаторов */
+    /* Плавающие UI элементы */
     .floating-ui {
       position: fixed; bottom: 30px;
       width: 44px; height: 44px; z-index: 160;
@@ -38,21 +38,21 @@ ader-container<!DOCTYPE html>
       transition: all 0.4s ease;
     }
 
-    /* Лоадер слева */
+    /* Лоадер (Твой скорректированный стиль) */
     #loader-container { left: 30px; opacity: 0; pointer-events: none; }
+    #transparent_circle { color: transparent; }
     .progress-ring__circle { 
       transition: stroke-dashoffset 0.3s linear; 
       transform: rotate(-90deg); 
       transform-origin: 50% 50%; 
     }
-    
-    #transparent_circle { color: transparent; }
 
-    /* Кнопка вверх справа */
+    /* Кнопка вверх */
     #back-to-top { right: 30px; color: white; opacity: 0; visibility: hidden; cursor: pointer; }
     #back-to-top.visible { opacity: 1; visibility: visible; }
     #back-to-top:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.3); }
 
+    /* Лайтбокс */
     #lightbox {
       display: none; position: fixed; inset: 0; z-index: 200;
       background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
@@ -78,8 +78,8 @@ ader-container<!DOCTYPE html>
 
   <div id="loader-container" class="floating-ui">
     <svg width="44" height="44" viewBox="0 0 44 44">
-      <circle class="text-white/5" id="transparent_circle" stroke="currentColor" stroke-width="2" fill="transparent" r="18" cx="22" cy="22"/>
-      <circle id="progress-circle" class="text-white" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="transparent" r="18" cx="22" cy="22"/>
+      <circle id="transparent_circle" stroke="currentColor" stroke-width="2" fill="transparent" r="18" cx="22" cy="22"/>
+      <circle id="progress-circle" class="text-white progress-ring__circle" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="transparent" r="18" cx="22" cy="22"/>
     </svg>
   </div>
 
