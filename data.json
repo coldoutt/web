@@ -1,8 +1,8 @@
 {
-  // "2026": [
-  //   { "title": "Сингапур", "folder": "02_Singapore", "count": 10 },
-  //   { "title": "Куала-Лумпур", "folder": "01_Kuala-Lumpur", "count": 10 }
-  // ],
+  "2026": [
+    { "title": "Сингапур", "folder": "02_Singapore", "count": 10 },
+    { "title": "Куала-Лумпур", "folder": "01_Kuala-Lumpur", "count": 10 }
+  ],
   "2025": [
     { "title": "Лангкави", "folder": "10_Langkawi", "count": 10 },
     { "title": "Пенанг", "folder": "09_Penang", "count": 79 }
